@@ -1,4 +1,4 @@
-# Day 02 — Connecting Devices (Cabling & Media Selection)
+# Connecting Devices (Cabling & Media Selection)
 
 **Tool:** Cisco Packet Tracer
 **Goal:** Connect a multi-site topology using the correct cable *type* and *medium* for each link — choosing between copper straight-through, copper crossover, and fiber (multimode vs. single-mode) based on the devices and the distance involved. Auto MDI-X is assumed disabled, so cable type must be chosen manually.
