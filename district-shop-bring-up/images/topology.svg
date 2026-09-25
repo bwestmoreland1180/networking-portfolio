@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 720 560" font-family="Helvetica,Arial,sans-serif">
+<rect width="720" height="560" fill="#ffffff"/>
+<g stroke="#9aa3ad" stroke-width="3" fill="none">
+<line x1="200" y1="80" x2="200" y2="200"/>
+<line x1="200" y1="200" x2="440" y2="200"/>
+<line x1="440" y1="200" x2="640" y2="200"/>
+<path d="M188 222 Q170 290 188 358"/>
+<path d="M212 222 Q230 290 212 358"/>
+<line x1="60" y1="380" x2="200" y2="380"/>
+<line x1="200" y1="380" x2="200" y2="500"/>
+</g>
+<g font-size="13" fill="#333" text-anchor="middle">
+<text x="215" y="145" text-anchor="start">e0/2</text>
+<text x="255" y="192">e0/3</text>
+<text x="400" y="192">e0/0</text>
+<text x="490" y="192">e0/1</text>
+<text x="150" y="250">e0/1</text>
+<text x="252" y="250">e0/0</text>
+<text x="150" y="340">e0/1</text>
+<text x="252" y="340">e0/0</text>
+<text x="80" y="372">e0</text>
+<text x="135" y="372">e0/3</text>
+<text x="215" y="445" text-anchor="start">e0/2</text>
+</g>
+<g font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">
+<rect x="170" y="45" width="60" height="36" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="68">WAP1</text>
+<rect x="160" y="182" width="80" height="40" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="207">SW1</text>
+<text x="152" y="206" font-size="11" font-weight="normal" text-anchor="end">DS-07-SW1 .11</text>
+<circle cx="440" cy="200" r="26" fill="#e7f5ec" stroke="#3b8a5a" stroke-width="2"/>
+<text x="440" y="205">RTR1</text>
+<text x="440" y="244" font-size="11" font-weight="normal">DS-07-RTR1 e0/0 .1</text>
+<ellipse cx="660" cy="200" rx="46" ry="24" fill="#f3f4f6" stroke="#6b7280" stroke-width="2"/>
+<text x="660" y="205" font-size="12">Internet</text>
+<rect x="160" y="358" width="80" height="40" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="383">SW2</text>
+<text x="275" y="410" font-size="11" font-weight="normal">DS-07-SW2 .12</text>
+<rect x="20" y="362" width="44" height="36" rx="4" fill="#fdf2e9" stroke="#b7791f" stroke-width="2"/>
+<text x="42" y="418" font-size="12">Server</text>
+<rect x="170" y="500" width="60" height="36" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="523">WAP2</text>
+</g>
+<text x="700" y="540" font-size="12" fill="#6b7280" text-anchor="end">Management VLAN 1: 192.168.10.0/24</text>
+</svg>
