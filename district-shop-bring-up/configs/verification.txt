@@ -1,0 +1,57 @@
+! Verification output from the District Shop run (Cisco CML, IOS-XE 17.16.1a)
+
+! ---- Interfaces up with correct addressing ----
+DS-07-SW1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up
+Ethernet0/1            unassigned      YES unset  up                    up
+Ethernet0/2            unassigned      YES unset  up                    up
+Ethernet0/3            unassigned      YES unset  up                    up
+Vlan1                  192.168.10.11   YES manual up                    up
+
+DS-07-SW2#show ip interface brief
+Vlan1                  192.168.10.12   YES manual up                    up
+(Ethernet0/0-3 up/up)
+
+DS-07-RTR1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.10.1    YES manual up                    up
+Ethernet0/1            unassigned      YES TFTP   administratively down down
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+
+DS-07-SW1#show running-config | include default-gateway
+ip default-gateway 192.168.10.1
+
+! ---- Running vs startup: unsaved, then saved (same pattern on all three devices) ----
+DS-07-SW1#show startup
+startup-config is not present
+DS-07-SW1#wr
+Building configuration...
+[OK]
+DS-07-SW1#show startup
+Using 1698 out of 131072 bytes
+(full saved configs in startup-configs.txt)
+
+! ---- Persistence: reload DS-07-SW1 ----
+DS-07-SW1#reload
+Proceed with reload? [confirm]
+...
+Castle Rysen Ops: Authorized engineers only.
+
+User Access Verification
+
+Password:                      <- console password VaultAccess
+DS-07-SW1>en
+Password:                      <- enable secret CrC0ffee!
+DS-07-SW1#
+
+! ---- Management reachability to the router ----
+DS-07-SW1#ping 192.168.10.1
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+
+DS-07-SW2#ping 192.168.10.1
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+! First packet dropped while ARP resolved 192.168.10.1, which is normal on a first ping.

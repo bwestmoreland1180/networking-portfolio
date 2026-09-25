@@ -1,0 +1,153 @@
+! Saved startup-configs from all three devices (output of `show startup-config` after `write memory`).
+! Cisco CML, IOS-XE 17.16.1a. Repeated "!" lines and default crypto PKI trustpoint blocks trimmed.
+! Passwords are the lab's published training credentials.
+
+! ===================== DS-07-SW1 =====================
+Using 1698 out of 131072 bytes
+version 17.16
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname DS-07-SW1
+!
+no logging console
+no aaa new-model
+ip cef
+login on-success log
+no ipv6 cef
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+enable secret 9 $9$y7V8dbjq6eAA3k$cCue8UovcZ7FI6Qf5VW5pfcBPl7lovTNGg3X6l2TeHg
+!
+interface Ethernet0/0
+ description Link to DS-07-SW2
+!
+interface Ethernet0/1
+ description Link to DS-07-SW2
+!
+interface Ethernet0/2
+ description WAP1
+!
+interface Ethernet0/3
+ description Uplink to DS-07-RTR1 e0/0
+!
+interface Vlan1
+ ip address 192.168.10.11 255.255.255.0
+!
+ip default-gateway 192.168.10.1
+!
+banner motd ^CCastle Rysen Ops: Authorized engineers only.^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 06300E34405A281A06120118
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ exec-timeout 0 0
+ password 7 0812444B050D000533080F013938
+ login
+ transport input ssh
+end
+
+! ===================== DS-07-SW2 =====================
+Using 1683 out of 131072 bytes
+version 17.16
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname DS-07-SW2
+!
+no logging console
+no aaa new-model
+ip cef
+login on-success log
+no ipv6 cef
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+enable secret 9 $9$ua7EAWZ2oDvm0U$aS4aH18PGeetJMd63qDO3QSqlt6UVUdeQEfWOA4.SfU
+!
+interface Ethernet0/0
+ description Uplink to DS-07-SW1
+!
+interface Ethernet0/1
+ description Uplink to DS-07-SW1
+!
+interface Ethernet0/2
+ description WAP2
+!
+interface Ethernet0/3
+ description Server
+!
+interface Vlan1
+ ip address 192.168.10.12 255.255.255.0
+!
+ip default-gateway 192.168.10.1
+!
+banner motd ^CCastle Rysen Ops: Authorized engineers only.^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 053D071A2D586F0A1A000401
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ exec-timeout 0 0
+ password 7 14241A0E00102F39052B30303100
+ login
+ transport input ssh
+end
+
+! ===================== DS-07-RTR1 =====================
+Using 1566 out of 131072 bytes
+version 17.16
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+!
+hostname DS-07-RTR1
+!
+no logging console
+no aaa new-model
+ip cef
+login on-success log
+no ipv6 cef
+!
+enable secret 9 $9$UEta/mNFjLkZrk$w8GEdJuWJjPoUxrCgqaRdqy57mRU0rXbu0v1Q2Dl8i6
+!
+interface Ethernet0/0
+ description Inside link to DS-07-SW1 e0/3
+ ip address 192.168.10.1 255.255.255.0
+!
+interface Ethernet0/1
+ no ip address
+ shutdown
+!
+interface Ethernet0/2
+ no ip address
+ shutdown
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+banner motd ^CCastle Rysen Ops: Authorized engineers only.^C
+!
+line con 0
+ exec-timeout 0 0
+ password 7 01250711571F270C22495D1A
+ logging synchronous
+ login
+line aux 0
+line vty 0 4
+ exec-timeout 0 0
+ password 7 122A0D121E1F09160B28272D2026
+ login
+ transport input ssh
+end
