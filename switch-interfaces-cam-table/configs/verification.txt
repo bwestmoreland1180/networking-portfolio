@@ -1,0 +1,52 @@
+! Show output from Switch6 (Cisco CML, IOS-XE L2 image). Read-only lab: no configuration was changed.
+
+! ---- Task 0: interface roll call ----
+Switch6#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES unset  up                    up
+Ethernet0/1            unassigned      YES unset  up                    up
+Ethernet0/2            unassigned      YES unset  up                    up
+Ethernet0/3            unassigned      YES unset  administratively down down
+
+! ---- Task 1: duplex / speed / VLAN ----
+Switch6#show interface status
+Port         Name               Status       Vlan       Duplex  Speed Type
+Et0/0        Uplink-to-CoreSwit connected    trunk        full   auto 10/100/1000BaseTX
+Et0/1        AccessPoint1       connected    10           full   auto 10/100/1000BaseTX
+Et0/2        SensorPod-A        connected    20           full   auto 10/100/1000BaseTX
+Et0/3        Reserved-StackLink disabled     1            full   auto 10/100/1000BaseTX
+
+! ---- Task 2: descriptions ----
+Switch6#show interface description
+Interface                      Status         Protocol Description
+Et0/0                          up             up       Uplink-to-CoreSwitch
+Et0/1                          up             up       AccessPoint1
+Et0/2                          up             up       SensorPod-A
+Et0/3                          admin down     down     Reserved-StackLink
+
+! ---- Error counters (from show interface, all four ports) ----
+! Et0/0: 107 in / 199 out packets | 0 input errors, 0 CRC, 0 output errors, 0 collisions, 0 late collision
+! Et0/1:  27 in /  86 out packets | 0 input errors, 0 CRC, 0 output errors, 0 collisions, 0 late collision
+! Et0/2:  26 in /  86 out packets | 0 input errors, 0 CRC, 0 output errors, 0 collisions, 0 late collision
+! Et0/3:   0 in /   0 out packets | admin down
+! All four: "Full-duplex, Auto-speed, media type is 10/100/1000BaseTX"
+
+! ---- Task 3: CAM table ----
+Switch6#show mac address-table
+          Mac Address Table
+-------------------------------------------
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.00ee.a05c    DYNAMIC     Et0/1
+  10    5a5a.1c1c.0d0d    STATIC      Et0/1
+  20    5254.0001.b70f    DYNAMIC     Et0/2
+  20    7c7c.b2b2.2020    STATIC      Et0/2
+  99    40a6.b77d.aa01    STATIC      Et0/0
+  99    40a6.b77d.bb02    STATIC      Et0/0
+Total Mac Addresses for this criterion: 6
+
+Switch6#show mac address-table address 5a5a.1c1c.0d0d
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5a5a.1c1c.0d0d    STATIC      Et0/1
+Total Mac Addresses for this criterion: 1
