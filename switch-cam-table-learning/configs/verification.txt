@@ -1,0 +1,62 @@
+! Output from the CAM table learning lab (Cisco CML: IOS-XE L2 switch + Tiny Core Linux endpoints)
+
+! ---- Task 0: endpoint addressing ----
+cisco@pc1:~$ ifconfig eth0
+eth0      Link encap:Ethernet  HWaddr 52:54:00:10:E5:13
+          inet addr:192.168.1.50  Bcast:192.168.1.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+cisco@pc1:~$ route -n
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0
+192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0
+
+cisco@pc2:~$ ifconfig eth0
+eth0      Link encap:Ethernet  HWaddr 52:54:00:C9:10:2A
+          inet addr:192.168.1.51  Bcast:192.168.1.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+cisco@pc2:~$ route -n
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.1.1     0.0.0.0         UG    0      0        0 eth0
+192.168.1.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0
+
+! ---- Task 1: ARP conversation from PC1 ----
+cisco@pc1:~$ arp -a
+                                   <- empty: PC1 has no entry for 192.168.1.51 yet
+cisco@pc1:~$ ping -c 5 192.168.1.51
+64 bytes from 192.168.1.51: seq=0 ttl=64 time=1.560 ms   <- includes ARP resolution
+64 bytes from 192.168.1.51: seq=1 ttl=64 time=0.958 ms
+64 bytes from 192.168.1.51: seq=2 ttl=64 time=0.947 ms
+64 bytes from 192.168.1.51: seq=3 ttl=64 time=0.827 ms
+64 bytes from 192.168.1.51: seq=4 ttl=64 time=0.955 ms
+5 packets transmitted, 5 packets received, 0% packet loss
+cisco@pc1:~$ arp -a
+? (192.168.1.51) at 52:54:00:c9:10:2a [ether]  on eth0
+
+! ---- Task 2: CAM table ----
+Switch6#show mac address-table
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.0010.e513    DYNAMIC     Et0/1     <- PC1 (matches ifconfig HWaddr)
+  10    5254.00c9.102a    DYNAMIC     Et0/2     <- PC2 (matches ifconfig HWaddr)
+  10    5a5a.1c1c.0d0d    STATIC      Et0/1
+  10    7c7c.b2b2.2020    STATIC      Et0/2
+  99    40a6.b77d.aa01    STATIC      Et0/0     <- uplink to CoreSwitch
+  99    40a6.b77d.bb02    STATIC      Et0/0     <- uplink to CoreSwitch
+Total Mac Addresses for this criterion: 6
+
+! ---- Task 3: flush and re-learn ----
+Switch6#clear mac address-table dynamic
+Switch6#show mac address-table
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.0010.e513    DYNAMIC     Et0/1     <- already re-learned from live traffic
+  10    5254.00c9.102a    DYNAMIC     Et0/2
+  10    5a5a.1c1c.0d0d    STATIC      Et0/1     <- statics untouched by the clear
+  10    7c7c.b2b2.2020    STATIC      Et0/2
+  99    40a6.b77d.aa01    STATIC      Et0/0
+  99    40a6.b77d.bb02    STATIC      Et0/0
+Total Mac Addresses for this criterion: 6
+
+cisco@pc1:~$ ping -c 5 192.168.1.51
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.901/0.944/0.997 ms   <- no ARP delay: PC1's ARP cache was not cleared
