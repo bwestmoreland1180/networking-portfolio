@@ -1,0 +1,53 @@
+! Output from the device-tracing lab (Cisco CML, IOS-XE: CoreSwitch + Switch6). Read-only investigation.
+
+! ================= Ticket 1: 192.168.1.118 (PC7, slow service) =================
+
+! ---- Step 1: IP -> MAC on CoreSwitch ----
+CoreSwitch#ping 192.168.1.118
+.!!!!                                            <- first probe lost to ARP resolution
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+CoreSwitch#show arp | include 192.168.1.118
+Internet  192.168.1.118           0   5254.00b8.0b2b  ARPA   Vlan10
+
+! ---- Step 2: where CoreSwitch sees that MAC ----
+CoreSwitch#show mac address-table
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.0002.cd74    DYNAMIC     Et0/1     <- Server2 (local access port)
+  10    5254.00b8.0b2b    DYNAMIC     Et0/0     <- PC7: behind the uplink
+  10    5254.00ed.1fb8    DYNAMIC     Et0/0     <- PC8: behind the uplink
+  10    aabb.cc00.0500    DYNAMIC     Et0/0     <- switch MAC: Et0/0 is the inter-switch link
+Total Mac Addresses for this criterion: 4
+
+! ---- Step 3: follow the uplink to Switch6 ----
+Switch6#show mac address-table
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.0002.cd74    DYNAMIC     Et0/0     <- Server2: back up the uplink
+  10    5254.00b8.0b2b    DYNAMIC     Et0/1     <- PC7: access port, end of trace
+  10    5254.00ed.1fb8    DYNAMIC     Et0/2     <- PC8
+  10    aabb.cc80.0600    DYNAMIC     Et0/0     <- switch MAC from the CoreSwitch side
+Total Mac Addresses for this criterion: 4
+
+Switch6#show mac address-table address 5254.00b8.0b2b
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.00b8.0b2b    DYNAMIC     Et0/1
+Total Mac Addresses for this criterion: 1
+
+RESULT: 192.168.1.118 = 5254.00b8.0b2b = Switch6 Et0/1 (PC7)
+
+! ================= Ticket 2: 192.168.1.111 (Server2, security alert) =================
+
+CoreSwitch#ping 192.168.1.111
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+CoreSwitch#show arp | include 192.168.1.111
+Internet  192.168.1.111           0   5254.0002.cd74  ARPA   Vlan10
+CoreSwitch#show mac address-table address 5254.0002.cd74
+Vlan    Mac Address       Type        Ports
+----    -----------       --------    -----
+  10    5254.0002.cd74    DYNAMIC     Et0/1
+Total Mac Addresses for this criterion: 1
+
+RESULT: 192.168.1.111 = 5254.0002.cd74 = CoreSwitch Et0/1 (Server2)
