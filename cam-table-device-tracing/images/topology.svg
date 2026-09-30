@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440" font-family="Helvetica,Arial,sans-serif">
+<rect width="720" height="440" fill="#ffffff"/>
+<g stroke="#9aa3ad" stroke-width="3" fill="none">
+<line x1="260" y1="84" x2="480" y2="84"/>
+<line x1="200" y1="106" x2="200" y2="250"/>
+<line x1="170" y1="294" x2="110" y2="360"/>
+<line x1="230" y1="294" x2="290" y2="360"/>
+</g>
+<g font-size="13" fill="#333">
+<text x="270" y="76">e0/1</text>
+<text x="210" y="160">e0/0 · uplink</text>
+<text x="210" y="240">e0/0</text>
+<text x="100" y="330" text-anchor="end">e0/1</text>
+<text x="300" y="330">e0/2</text>
+</g>
+<g font-size="14" font-weight="bold" fill="#1f2937" text-anchor="middle">
+<rect x="140" y="62" width="120" height="44" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="89">CoreSwitch</text>
+<rect x="480" y="62" width="170" height="44" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+<text x="565" y="89">Server2</text>
+<text x="565" y="124" font-size="11" font-weight="normal" fill="#555">192.168.1.111 · 5254.0002.cd74</text>
+<text x="565" y="140" font-size="11" font-weight="normal" fill="#c0392b">security alert → CoreSwitch e0/1</text>
+<rect x="140" y="250" width="120" height="44" rx="6" fill="#e8f0fe" stroke="#4a6fa5" stroke-width="2"/>
+<text x="200" y="277">Switch6</text>
+<rect x="35" y="360" width="150" height="44" rx="4" fill="#fdf2e9" stroke="#b7791f" stroke-width="2"/>
+<text x="110" y="387">PC7</text>
+<text x="110" y="422" font-size="11" font-weight="normal" fill="#555">.118 · 5254.00b8.0b2b</text>
+<rect x="215" y="360" width="150" height="44" rx="4" fill="#f3f4f6" stroke="#9aa3ad" stroke-width="2"/>
+<text x="290" y="387">PC8</text>
+<text x="290" y="422" font-size="11" font-weight="normal" fill="#555">.130 · 5254.00ed.1fb8</text>
+</g>
+<g font-size="12" fill="#333">
+<text x="430" y="250" font-weight="bold">PC7 trace</text>
+<text x="430" y="272">1. ping + show arp → 5254.00b8.0b2b</text>
+<text x="430" y="292">2. CoreSwitch: MAC on e0/0 (uplink)</text>
+<text x="430" y="312">3. Switch6: MAC on e0/1 → PC7</text>
+</g>
+<text x="16" y="30" font-size="12" fill="#6b7280">VLAN 10 · 192.168.1.0/24 · mapped from CAM tables (no diagram provided)</text>
+</svg>
