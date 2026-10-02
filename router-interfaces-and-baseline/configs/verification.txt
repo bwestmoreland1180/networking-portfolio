@@ -1,0 +1,68 @@
+! Captured output from the lab (Cisco CML, IOS-XE router image: Cafe-RT1).
+! Typos and repeated output trimmed. Type 9 hashes replaced with <type 9 hash>.
+
+! ---- Task 1: interfaces before configuration ----
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES TFTP   administratively down down
+Ethernet0/1            unassigned      YES TFTP   administratively down down
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+Ethernet1/0            unassigned      YES TFTP   administratively down down
+Ethernet1/1            unassigned      YES TFTP   administratively down down
+Ethernet1/2            unassigned      YES TFTP   administratively down down
+Ethernet1/3            unassigned      YES TFTP   administratively down down
+
+! ---- Task 3: neighbour and first ping ----
+Cafe-RT1#show cdp neighbors
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+Cafe-SW1         Eth 0/0           177             R S I  Linux Uni Eth 0/0
+
+Total cdp entries displayed : 1
+Cafe-RT1#ping 192.168.42.2
+Sending 5, 100-byte ICMP Echos to 192.168.42.2, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+
+! ---- Save, then final state ----
+Cafe-RT1#wr
+Building configuration...
+[OK]
+Cafe-RT1#show interface description
+Interface                      Status         Protocol Description
+Et0/0                          up             up       ##CoffeHouse-LAN
+Et0/1                          admin down     down     ##Wan-Pending Shutdown##
+Et0/2                          admin down     down
+Et0/3                          admin down     down
+Et1/0                          admin down     down
+Et1/1                          admin down     down
+Et1/2                          admin down     down
+Et1/3                          admin down     down
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.42.1    YES manual up                    up
+Ethernet0/1            unassigned      YES TFTP   administratively down down
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+Ethernet1/0            unassigned      YES TFTP   administratively down down
+Ethernet1/1            unassigned      YES TFTP   administratively down down
+Ethernet1/2            unassigned      YES TFTP   administratively down down
+Ethernet1/3            unassigned      YES TFTP   administratively down down
+
+! ---- Baseline: authentication ----
+Cafe-RT1#show running-config | include username|enable secret|login|transport
+login on-success log
+enable secret 9 <type 9 hash>
+username cisco secret 9 <type 9 hash>
+ login local
+ login local
+ transport input telnet ssh
+
+! ---- Saved config (two commands pasted on one line; see README note 5) ----
+Cafe-RT1#show startup-config | include description| ip addresss ping 192.168.42.2
+ description ##CoffeHouse-LAN
+ description ##Wan-Pending Shutdown##
+Cafe-RT1#ping 192.168.42.2
+Sending 5, 100-byte ICMP Echos to 192.168.42.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
