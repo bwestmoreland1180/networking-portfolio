@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" font-family="Arial, sans-serif" font-size="13">
+<rect width="760" height="330" fill="#ffffff"/>
+<text x="380" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">Coffee House: Cafe-SW1 and Cafe-SW2, management VLAN 42</text>
+<g stroke="#374151" stroke-width="2">
+<line x1="290" y1="120" x2="470" y2="120"/>
+<line x1="200" y1="155" x2="200" y2="240"/>
+<line x1="500" y1="155" x2="500" y2="240"/>
+<line x1="620" y1="155" x2="620" y2="240"/>
+</g>
+<g fill="#dbeafe" stroke="#1d4ed8" stroke-width="2">
+<rect x="110" y="85" width="180" height="70" rx="8"/>
+<rect x="470" y="85" width="180" height="70" rx="8"/>
+</g>
+<g fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5">
+<rect x="140" y="240" width="120" height="44" rx="6"/>
+<rect x="440" y="240" width="120" height="44" rx="6"/>
+<rect x="580" y="240" width="120" height="44" rx="6"/>
+</g>
+<g text-anchor="middle" fill="#111827">
+<text x="200" y="112" font-weight="bold">Cafe-SW1</text>
+<text x="200" y="132">Vlan42 192.168.42.1/24</text>
+<text x="560" y="112" font-weight="bold">Cafe-SW2</text>
+<text x="560" y="132">Vlan42 192.168.42.2/24</text>
+<text x="200" y="267">Barista POS</text>
+<text x="500" y="267">Camera</text>
+<text x="640" y="267">Thermostat</text>
+<text x="380" y="108" fill="#1d4ed8">802.1Q trunk</text>
+<text x="380" y="140" fill="#1d4ed8">VLANs 1, 42</text>
+<text x="380" y="312" fill="#4b5563">Default gateway on both switches: 192.168.42.254. All live links full duplex, 0 collisions.</text>
+</g>
+<g font-size="12" fill="#374151">
+<text x="296" y="114">Et0/0</text>
+<text x="432" y="114">Et0/0</text>
+<text x="206" y="175">Et0/1</text>
+<text x="506" y="175">Et0/1</text>
+<text x="626" y="175">Et0/3</text>
+</g>
+</svg>
