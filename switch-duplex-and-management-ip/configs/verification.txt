@@ -1,0 +1,107 @@
+! Captured output from the lab (Cisco CML, IOS-XE L2 switch image: Cafe-SW1 + Cafe-SW2).
+! Login, typos and repeated output trimmed. Column spacing restored after copying from the console.
+
+! ================= Cafe-SW1 =================
+
+! ---- Task 0: descriptions ----
+Cafe-SW1#show interface status
+Port         Name               Status       Vlan       Duplex  Speed Type
+Et0/0        ##Cafe-SW2 uplink# connected    1            full   auto 10/100/1000BaseTX
+Et0/1        ##Barista POS hand connected    1            full   auto 10/100/1000BaseTX
+Et0/2                           connected    1            full   auto 10/100/1000BaseTX
+Et0/3                           connected    1            full   auto 10/100/1000BaseTX
+Et1/0                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/1                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/2                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/3                           disabled     1            full   auto 10/100/1000BaseTX
+
+! ---- Task 1: duplex and collision counters ----
+Cafe-SW1#show interface ethernet0/0 | include line|duplex|coll
+Ethernet0/0 is up, line protocol is up (connected)
+  Full-duplex, Auto-speed, media type is 10/100/1000BaseTX
+     0 output errors, 0 collisions, 1 interface resets
+     0 babbles, 0 late collision, 0 deferred
+Cafe-SW1#show interface ethernet0/1 | include line|duplex|coll
+Ethernet0/1 is up, line protocol is up (connected)
+  Full-duplex, Auto-speed, media type is 10/100/1000BaseTX
+     0 output errors, 0 collisions, 1 interface resets
+     0 babbles, 0 late collision, 0 deferred
+
+! ---- Task 2, problem 1: SVI addressed but down/down ----
+Cafe-SW1#show ip interface brief
+Vlan42                 192.168.42.1    YES manual down                  down
+Cafe-SW1#show vlan brief
+VLAN Name                             Status    Ports
+1    default                          active    Et0/1, Et0/2, Et0/3, Et1/0
+                                                Et1/1, Et1/2, Et1/3
+1002 fddi-default                     act/unsup
+1003 token-ring-default               act/unsup
+1004 fddinet-default                  act/unsup
+1005 trnet-default                    act/unsup
+                                      <- no VLAN 42 in the database
+
+! ---- Task 2, problem 2: VLAN created, uplink set to access VLAN 42 ----
+Cafe-SW1#show ip interface brief
+Vlan42                 192.168.42.1    YES manual up                    up
+Cafe-SW1#ping 192.168.42.2
+.....
+Success rate is 0 percent (0/5)
+Cafe-SW1#show arp
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  192.168.42.1            -   aabb.cc80.0200  ARPA   Vlan42
+Internet  192.168.42.2            1   aabb.cc80.0100  ARPA   Vlan42
+Cafe-SW1#show mac address-table vlan 42
+          Mac Address Table
+Vlan    Mac Address       Type        Ports
+                                      <- empty
+Cafe-SW1#show cdp neighbors
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+Cafe-SW2         Eth 0/0           148             R S I  Linux Uni Eth 0/0
+
+! ---- Task 2, fixed: uplink back to trunk ----
+Cafe-SW1#show interface trunk
+Port        Mode             Encapsulation  Status        Native vlan
+Et0/0       on               802.1q         trunking      1
+
+Port        Vlans allowed on trunk
+Et0/0       1-4094
+
+Port        Vlans allowed and active in management domain
+Et0/0       1,42
+
+Port        Vlans in spanning tree forwarding state and not pruned
+Et0/0       1,42
+Cafe-SW1#ping 192.168.42.2
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+
+! ================= Cafe-SW2 =================
+
+! ---- Task 0: descriptions ----
+Cafe-SW2#show interface status
+Port         Name               Status       Vlan       Duplex  Speed Type
+Et0/0        ##CAfe-SW1 uplink# connected    1            full   auto 10/100/1000BaseTX
+Et0/1        ##Camera feed##    connected    1            full   auto 10/100/1000BaseTX
+Et0/2                           connected    1            full   auto 10/100/1000BaseTX
+Et0/3        ##Thermostat circu connected    1            full   auto 10/100/1000BaseTX
+Et1/0                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/1                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/2                           disabled     1            full   auto 10/100/1000BaseTX
+Et1/3                           disabled     1            full   auto 10/100/1000BaseTX
+
+! ---- Task 1: duplex and collision counters (Et0/0, Et0/1 and Et0/3 identical) ----
+Cafe-SW2#show interface ethernet 0/0 | include line|duplex|coll
+Ethernet0/0 is up, line protocol is up (connected)
+  Full-duplex, Auto-speed, media type is 10/100/1000BaseTX
+     0 output errors, 0 collisions, 1 interface resets
+     0 babbles, 0 late collision, 0 deferred
+
+! ---- Task 2: management SVI and reachability ----
+Cafe-SW2#show ip interface brief
+Vlan42                 192.168.42.2    YES manual up                    up
+Cafe-SW2#ping 192.168.42.1
+.....
+Success rate is 0 percent (0/5)            <- Cafe-SW1 not yet fixed (two attempts)
+Cafe-SW2#ping 192.168.42.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms

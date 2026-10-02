@@ -1,0 +1,36 @@
+! Working configuration from the lab (Cisco CML, IOS-XE L2 switch image).
+! Commands only, typos and retries removed. See verification.txt for the captured output.
+
+! ===================== Cafe-SW1 =====================
+configure terminal
+ interface ethernet 0/0
+  description ##Cafe-SW2 uplink##
+  switchport trunk encapsulation dot1q
+  switchport mode trunk
+  switchport trunk allowed vlan add 42
+ interface ethernet 0/1
+  description ##Barista POS handoff##
+ vlan 42
+ interface vlan42
+  ip address 192.168.42.1 255.255.255.0
+  no shutdown
+ ip default-gateway 192.168.42.254
+end
+
+! ===================== Cafe-SW2 =====================
+configure terminal
+ interface ethernet 0/0
+  description ##CAfe-SW1 uplink##
+  switchport trunk encapsulation dot1q
+  switchport mode trunk
+  switchport trunk allowed vlan add 42
+ interface ethernet 0/1
+  description ##Camera feed##
+ interface ethernet 0/3
+  description ##Thermostat circuit##
+ vlan 42
+ interface vlan 42
+  ip address 192.168.42.2 255.255.255.0
+  no shutdown
+ ip default-gateway 192.168.42.254
+end
