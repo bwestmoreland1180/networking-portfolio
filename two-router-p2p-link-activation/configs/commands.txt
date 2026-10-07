@@ -1,0 +1,42 @@
+! Working configuration from the lab (Cisco CML, IOS-XE 17.16).
+! Commands only, typos and retries removed.
+! Both routers arrived with the security baseline already in place (type 9 enable secret,
+! username cisco privilege 15 with a type 9 secret, login local on con/aux/vty,
+! login on-success log) and with descriptions on Et0/0 and Et0/1. None of that needed changing.
+
+! ===================== Cafe-RT1 =====================
+configure terminal
+ interface ethernet 0/0
+  ip address 192.168.42.1 255.255.255.0
+  no shutdown
+ interface ethernet 0/1
+  ip address 10.8.0.1 255.255.255.252
+  no shutdown
+end
+write memory
+
+! ===================== Fallout-RT1 =====================
+configure terminal
+ interface ethernet 0/0
+  ip address 192.168.84.1 255.255.255.0
+  no shutdown
+ interface ethernet 0/1
+  ip address 10.8.0.2 255.255.255.252
+  no shutdown
+end
+write memory
+
+! ===================== Cleanup of my own mistakes =====================
+! Cafe-RT1: a stray user and a plaintext console password (see README notes 1 and 2)
+configure terminal
+ no username secret
+ line con 0
+  no password
+end
+write memory
+
+! Fallout-RT1: a stray global command (see README note 3)
+configure terminal
+ no vty-async
+end
+write memory

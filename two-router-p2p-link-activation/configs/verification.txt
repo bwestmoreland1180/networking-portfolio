@@ -1,0 +1,202 @@
+! Captured output from the lab (Cisco CML, IOS-XE 17.16: Cafe-RT1 and Fallout-RT1).
+! Typos and repeated output trimmed. Type 9 hashes replaced with <type 9 hash>.
+! "show interfaces" output is cut down to the state, description, address and counter lines.
+! Route-table code legends removed.
+
+! ============================================================
+! Cafe-RT1
+! ============================================================
+
+! ---- Baseline as delivered (before any change) ----
+Cafe-RT1#show startup-config
+startup-config is not present
+Cafe-RT1#show running-config
+version 17.16
+hostname Cafe-RT1
+login on-success log
+enable secret 9 <type 9 hash>
+username cisco privilege 15 secret 9 <type 9 hash>
+interface Ethernet0/0
+ description ## Coffee House LAN - configure during lab
+ no ip address
+ shutdown
+interface Ethernet0/1
+ description ## P2P-to-Fallout - configure during lab
+ no ip address
+ shutdown
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ login local
+line vty 0 4
+ exec-timeout 0 0
+ login local
+ transport input telnet ssh
+
+! ---- Interfaces before activation ----
+Cafe-RT1#show interface description
+Interface                      Status         Protocol Description
+Et0/0                          admin down     down     ## Coffee House LAN - configure during lab
+Et0/1                          admin down     down     ## P2P-to-Fallout - configure during lab
+Et0/2                          admin down     down
+Et0/3                          admin down     down
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            unassigned      YES TFTP   administratively down down
+Ethernet0/1            unassigned      YES TFTP   administratively down down
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+
+! ---- Interfaces after activation ----
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.42.1    YES manual up                    up
+Ethernet0/1            10.8.0.1        YES manual up                    up
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+
+! ---- Reachability across the point-to-point link ----
+Cafe-RT1#ping 10.8.0.2
+Sending 5, 100-byte ICMP Echos to 10.8.0.2, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+Cafe-RT1#ping 10.8.0.2
+Sending 5, 100-byte ICMP Echos to 10.8.0.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+! ---- Interface statistics after the cutover ----
+Cafe-RT1#show interface ethernet 0/0
+Ethernet0/0 is up, line protocol is up
+  Description: ## Coffee House LAN - configure during lab
+  Internet address is 192.168.42.1/24
+  Input queue: 0/75/0/0 (size/max/drops/flushes); Total output drops: 0
+     0 packets input, 0 bytes, 0 no buffer
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+     313 packets output, 37906 bytes, 0 underruns
+     0 output errors, 0 collisions, 2 interface resets
+Cafe-RT1#show interface ethernet 0/1
+Ethernet0/1 is up, line protocol is up
+  Description: ## P2P-to-Fallout - configure during lab
+  Internet address is 10.8.0.1/30
+  Input queue: 0/75/0/0 (size/max/drops/flushes); Total output drops: 0
+     282 packets input, 29424 bytes, 0 no buffer
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+     500 packets output, 46685 bytes, 0 underruns
+     0 output errors, 0 collisions, 2 interface resets
+
+! ---- After removing the stray user and the console password ----
+Cafe-RT1#show run | include username|password
+username cisco privilege 15 secret 9 <type 9 hash>
+Cafe-RT1#show ip route connected
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.8.0.0/30 is directly connected, Ethernet0/1
+L        10.8.0.1/32 is directly connected, Ethernet0/1
+      192.168.42.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.42.0/24 is directly connected, Ethernet0/0
+L        192.168.42.1/32 is directly connected, Ethernet0/0
+
+! ---- Save, then read the saved config back ----
+Cafe-RT1#wr
+Building configuration...
+[OK]
+Cafe-RT1#show startup-config | include ip address|username|password
+username cisco privilege 15 secret 9 <type 9 hash>
+ ip address 192.168.42.1 255.255.255.0
+ ip address 10.8.0.1 255.255.255.252
+ no ip address
+ no ip address
+
+! ============================================================
+! Fallout-RT1
+! ============================================================
+
+! ---- Interfaces after activation (Et0/1 still on the wrong address, see README note 5) ----
+Fallout-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.84.1    YES manual up                    up
+Ethernet0/1            10.8.0.1        YES manual up                    up
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+
+! ---- After correcting Et0/1 to 10.8.0.2 ----
+Fallout-RT1#ping 10.8.0.1
+Sending 5, 100-byte ICMP Echos to 10.8.0.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+! ---- Security posture ----
+Fallout-RT1#show run | section line
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ login local
+line vty 0 4
+ exec-timeout 0 0
+ login local
+ transport input telnet ssh
+Fallout-RT1#show run | include username|enable|vty
+vty-async
+enable secret 9 <type 9 hash>
+username cisco privilege 15 secret 9 <type 9 hash>
+line vty 0 4
+Fallout-RT1#show run | include secret|login
+login on-success log
+enable secret 9 <type 9 hash>
+username cisco privilege 15 secret 9 <type 9 hash>
+ login local
+ login local
+ login local
+
+! ---- Descriptions, routes and interface statistics ----
+Fallout-RT1#show interface description
+Interface                      Status         Protocol Description
+Et0/0                          up             up       ## Fallout Shelter LAN - configure during lab
+Et0/1                          up             up       ## P2P-to-CoffeeHouse - configure during lab
+Et0/2                          admin down     down     ## Spare module - keep shutdown
+Et0/3                          admin down     down
+Fallout-RT1#show ip route connected
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.8.0.0/30 is directly connected, Ethernet0/1
+L        10.8.0.2/32 is directly connected, Ethernet0/1
+      192.168.84.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.84.0/24 is directly connected, Ethernet0/0
+L        192.168.84.1/32 is directly connected, Ethernet0/0
+Fallout-RT1#show interface ethernet 0/0
+Ethernet0/0 is up, line protocol is up
+  Description: ## Fallout Shelter LAN - configure during lab
+  Internet address is 192.168.84.1/24
+  Input queue: 0/75/0/0 (size/max/drops/flushes); Total output drops: 0
+     0 packets input, 0 bytes, 0 no buffer
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+     149 packets output, 19530 bytes, 0 underruns
+     0 output errors, 0 collisions, 2 interface resets
+Fallout-RT1#show interface ethernet 0/1
+Ethernet0/1 is up, line protocol is up
+  Description: ## P2P-to-CoffeeHouse - configure during lab
+  Internet address is 10.8.0.2/30
+  Input queue: 0/75/0/0 (size/max/drops/flushes); Total output drops: 0
+     265 packets input, 23363 bytes, 0 no buffer
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+     384 packets output, 33764 bytes, 0 underruns
+     0 output errors, 0 collisions, 2 interface resets
+
+! ---- Remove the stray command, save, confirm the version ----
+Fallout-RT1(config)#no vty-async
+Fallout-RT1#wr
+Building configuration...
+[OK]
+Fallout-RT1#show version | include Version
+Cisco IOS Software [IOSXE], Linux Software (X86_64BI_LINUX-ADVENTERPRISEK9-M), Version 17.16.1a, RELEASE SOFTWARE (fc1)
+Fallout-RT1#show run | include version
+version 17.16
