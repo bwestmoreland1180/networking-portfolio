@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 270" font-family="Arial, sans-serif" font-size="13">
+<rect width="860" height="270" fill="#ffffff"/>
+<text x="430" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">Coffee House to Fallout Shelter: two LAN gateways and a /30 point-to-point link</text>
+<line x1="340" y1="120" x2="520" y2="120" stroke="#374151" stroke-width="2"/>
+<line x1="40" y1="120" x2="160" y2="120" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 5"/>
+<line x1="700" y1="120" x2="820" y2="120" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 5"/>
+<rect x="160" y="85" width="180" height="70" rx="8" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<rect x="520" y="85" width="180" height="70" rx="8" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<g text-anchor="middle" fill="#111827">
+<text x="250" y="116" font-weight="bold">Cafe-RT1</text>
+<text x="250" y="136">IOS-XE 17.16</text>
+<text x="610" y="116" font-weight="bold">Fallout-RT1</text>
+<text x="610" y="136">IOS-XE 17.16.1a</text>
+<text x="430" y="104" font-weight="bold">10.8.0.0/30</text>
+<text x="100" y="62" fill="#6b7280">Coffee House LAN</text>
+<text x="100" y="80" fill="#6b7280">192.168.42.0/24</text>
+<text x="760" y="62" fill="#6b7280">Fallout Shelter LAN</text>
+<text x="760" y="80" fill="#6b7280">192.168.84.0/24</text>
+<text x="430" y="212" fill="#4b5563">All four configured ports up/up with zero errors or drops. Pings pass in both directions across the /30.</text>
+<text x="430" y="234" fill="#4b5563">No hosts are attached to either LAN in this lab. Et0/2 and Et0/3 are unused and shut on both routers.</text>
+</g>
+<g font-size="12" fill="#374151">
+<text x="346" y="138">Et0/1 .1</text>
+<text x="466" y="138">Et0/1 .2</text>
+<text x="104" y="138">Et0/0 .1</text>
+<text x="706" y="138">Et0/0 .1</text>
+</g>
+</svg>
