@@ -1,0 +1,14 @@
+! Static routes added in the lab (Cisco CML, IOS-XE router image).
+! Interface addressing was preloaded by the lab. Commands only.
+
+! ===================== Cafe-RT1 =====================
+configure terminal
+ ip route 192.168.3.0 255.255.255.0 192.168.2.2
+end
+write memory
+
+! ===================== Fallout-RT1 =====================
+configure terminal
+ ip route 192.168.1.0 255.255.255.0 192.168.2.1
+end
+write memory

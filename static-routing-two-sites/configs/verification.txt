@@ -1,0 +1,81 @@
+! Captured output from the lab (Cisco CML: Cafe-RT1, Fallout-RT1, Fallout-SRV).
+! Login, the route code legend and console log messages trimmed.
+
+! ================= Cafe-RT1 =================
+
+! ---- Task 0: baseline ----
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.1.1     YES TFTP   up                    up
+Ethernet0/1            192.168.2.1     YES TFTP   up                    up
+Ethernet0/2            unassigned      YES unset  administratively down down
+Ethernet0/3            unassigned      YES unset  administratively down down
+Cafe-RT1#show ip route
+Gateway of last resort is not set
+
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.1.0/24 is directly connected, Ethernet0/0
+L        192.168.1.1/32 is directly connected, Ethernet0/0
+      192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.2.0/30 is directly connected, Ethernet0/1
+L        192.168.2.1/32 is directly connected, Ethernet0/1
+
+! ---- Task 1: static route to the Fallout LAN ----
+Cafe-RT1(config)#ip route 192.168.3.0 255.255.255.0 192.168.2.2
+Cafe-RT1#show ip route static
+Gateway of last resort is not set
+
+S     192.168.3.0/24 [1/0] via 192.168.2.2
+
+! ---- Task 3: router to server ----
+Cafe-RT1#ping 192.168.3.100
+Sending 5, 100-byte ICMP Echos to 192.168.3.100, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms
+Cafe-RT1#wr
+Building configuration...
+[OK]
+
+! ================= Fallout-RT1 =================
+
+! ---- Task 0: baseline ----
+Fallout-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.3.1     YES TFTP   up                    up
+Ethernet0/1            192.168.2.2     YES TFTP   up                    up
+Ethernet0/2            unassigned      YES unset  administratively down down
+Ethernet0/3            unassigned      YES unset  administratively down down
+Fallout-RT1#show ip route
+Gateway of last resort is not set
+
+      192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.2.0/30 is directly connected, Ethernet0/1
+L        192.168.2.2/32 is directly connected, Ethernet0/1
+      192.168.3.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.3.0/24 is directly connected, Ethernet0/0
+L        192.168.3.1/32 is directly connected, Ethernet0/0
+
+! ---- Task 2: static route to the Coffee House LAN ----
+Fallout-RT1(config)#ip route 192.168.1.0 255.255.255.0 192.168.2.1
+Fallout-RT1#show ip route static
+Gateway of last resort is not set
+
+S     192.168.1.0/24 [1/0] via 192.168.2.1
+Fallout-RT1#wr
+Building configuration...
+[OK]
+
+! ================= Fallout-SRV (192.168.3.100) =================
+
+! ---- Task 3: host to host, across both routers ----
+cisco@fallout-srv:~$ ping -c 5 192.168.1.50
+PING 192.168.1.50 (192.168.1.50): 56 data bytes
+64 bytes from 192.168.1.50: seq=0 ttl=62 time=1.697 ms
+64 bytes from 192.168.1.50: seq=1 ttl=62 time=1.054 ms
+64 bytes from 192.168.1.50: seq=2 ttl=62 time=1.055 ms
+64 bytes from 192.168.1.50: seq=3 ttl=62 time=1.993 ms
+64 bytes from 192.168.1.50: seq=4 ttl=62 time=1.142 ms
+
+--- 192.168.1.50 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 1.054/1.388/1.993 ms
