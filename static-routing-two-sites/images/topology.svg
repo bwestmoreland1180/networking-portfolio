@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" font-family="Arial, sans-serif" font-size="13">
+<rect width="860" height="300" fill="#ffffff"/>
+<text x="430" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">Two sites joined by static routes</text>
+<g stroke="#374151" stroke-width="2">
+<line x1="370" y1="120" x2="490" y2="120"/>
+<line x1="130" y1="120" x2="210" y2="120"/>
+<line x1="650" y1="120" x2="730" y2="120"/>
+</g>
+<g fill="#dcfce7" stroke="#15803d" stroke-width="2">
+<rect x="210" y="85" width="160" height="70" rx="8"/>
+<rect x="490" y="85" width="160" height="70" rx="8"/>
+</g>
+<g fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5">
+<rect x="20" y="92" width="110" height="56" rx="6"/>
+<rect x="730" y="92" width="110" height="56" rx="6"/>
+</g>
+<g text-anchor="middle" fill="#111827">
+<text x="290" y="125" font-weight="bold">Cafe-RT1</text>
+<text x="570" y="125" font-weight="bold">Fallout-RT1</text>
+<text x="75" y="116">Host</text>
+<text x="75" y="134">192.168.1.50</text>
+<text x="785" y="116">Fallout-SRV</text>
+<text x="785" y="134">192.168.3.100</text>
+<text x="430" y="108" fill="#1d4ed8">192.168.2.0/30</text>
+<text x="170" y="176" fill="#4b5563">192.168.1.0/24</text>
+<text x="690" y="176" fill="#4b5563">192.168.3.0/24</text>
+<text x="290" y="215" fill="#b45309">S 192.168.3.0/24</text>
+<text x="290" y="233" fill="#b45309">via 192.168.2.2</text>
+<text x="570" y="215" fill="#b45309">S 192.168.1.0/24</text>
+<text x="570" y="233" fill="#b45309">via 192.168.2.1</text>
+<text x="430" y="278" fill="#4b5563">Fallout-SRV to host: 5 of 5 replies, ttl=62 (two router hops).</text>
+</g>
+<g font-size="12" fill="#374151">
+<text x="374" y="138">Et0/1 .1</text>
+<text x="440" y="138">Et0/1 .2</text>
+<text x="152" y="112">Et0/0 .1</text>
+<text x="656" y="112">Et0/0 .1</text>
+</g>
+</svg>
