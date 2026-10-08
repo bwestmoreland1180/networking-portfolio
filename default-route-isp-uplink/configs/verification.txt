@@ -1,0 +1,51 @@
+! Captured output from the lab (Cisco CML: Cafe-RT1 + Cafe-PC).
+! Login, the route code legend and console log messages trimmed.
+
+! ================= Cafe-RT1 =================
+
+! ---- Task 0: ISP uplink ----
+Cafe-RT1(config-if)#ip address 216.05.2 255.255.255.252
+                                       ^
+% Invalid input detected at '^' marker.
+Cafe-RT1(config-if)#ip address 216.0.5.2 255.255.255.252
+Cafe-RT1(config-if)#no shutdown
+*Oct  8 01:15:56.728: %LINK-3-UPDOWN: Interface Ethernet0/2, changed state to up
+*Oct  8 01:15:57.729: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/2, changed state to up
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.1.1     YES TFTP   up                    up
+Ethernet0/1            192.168.2.1     YES TFTP   up                    up
+Ethernet0/2            216.0.5.2       YES manual up                    up
+Ethernet0/3            unassigned      YES unset  administratively down down
+Cafe-RT1#ping 216.0.5.1
+Sending 5, 100-byte ICMP Echos to 216.0.5.1, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms
+
+! ---- Task 1: default route ----
+Cafe-RT1(config)#ip route 0.0.0.0 0.0.0.0 216.0.5.1
+Cafe-RT1#show ip route | include Gateway
+Gateway of last resort is 216.0.5.1 to network 0.0.0.0
+Cafe-RT1#show ip route static
+Gateway of last resort is 216.0.5.1 to network 0.0.0.0
+
+S*    0.0.0.0/0 [1/0] via 216.0.5.1
+S     192.168.3.0/24 [1/0] via 192.168.2.2
+Cafe-RT1#wr
+Building configuration...
+[OK]
+
+! ================= Cafe-PC =================
+
+! ---- Task 2: LAN host to the external test address ----
+cisco@cafe-pc:~$ ping -c 5 8.8.8.8
+PING 8.8.8.8 (8.8.8.8): 56 data bytes
+64 bytes from 8.8.8.8: seq=0 ttl=254 time=1.549 ms
+64 bytes from 8.8.8.8: seq=1 ttl=254 time=0.995 ms
+64 bytes from 8.8.8.8: seq=2 ttl=254 time=1.002 ms
+64 bytes from 8.8.8.8: seq=3 ttl=254 time=0.998 ms
+64 bytes from 8.8.8.8: seq=4 ttl=254 time=0.958 ms
+
+--- 8.8.8.8 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.958/1.100/1.549 ms

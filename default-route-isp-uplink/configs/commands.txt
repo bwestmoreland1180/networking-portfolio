@@ -1,0 +1,12 @@
+! Configuration added in the lab (Cisco CML, IOS-XE router image).
+! LAN and Fallout link addressing, and the static route to 192.168.3.0/24, were already in place.
+
+! ===================== Cafe-RT1 =====================
+configure terminal
+ interface ethernet 0/2
+  description ##ISP-Uplink
+  ip address 216.0.5.2 255.255.255.252
+  no shutdown
+ ip route 0.0.0.0 0.0.0.0 216.0.5.1
+end
+write memory
