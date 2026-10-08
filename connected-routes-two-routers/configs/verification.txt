@@ -1,0 +1,110 @@
+! Captured output from the lab (Cisco CML, IOS-XE router image: Cafe-RT1 + Fallout-RT1).
+! Login, typos, the route code legend and repeated output trimmed.
+
+! ================= Cafe-RT1 =================
+
+! ---- Problem 1: addresses on the wrong interfaces ----
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.2.1     YES manual up                    up
+Ethernet0/1            192.168.1.1     YES manual up                    up
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+Cafe-RT1#show ip route connected
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.1.0/24 is directly connected, Ethernet0/1
+L        192.168.1.1/32 is directly connected, Ethernet0/1
+      192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.2.0/24 is directly connected, Ethernet0/0
+L        192.168.2.1/32 is directly connected, Ethernet0/0
+Cafe-RT1#ping 192.168.2.2
+.....
+Success rate is 0 percent (0/5)
+
+! ---- Problem 2: fixing one port at a time is refused ----
+Cafe-RT1(config)#interface ethernet 0/0
+Cafe-RT1(config-if)#ip address 192.168.1.1 255.255.255.0
+% 192.168.1.0 overlaps with Ethernet0/1
+Cafe-RT1(config-if)#interface ethernet 0/1
+Cafe-RT1(config-if)#ip address 192.168.2.1 255.255.255.0
+% 192.168.2.0 overlaps with Ethernet0/0
+
+! ---- Fix: clear both, then re-apply ----
+Cafe-RT1(config)#interface ethernet 0/0
+Cafe-RT1(config-if)#no ip address
+Cafe-RT1(config-if)#interface ethernet 0/1
+Cafe-RT1(config-if)#no ip address
+Cafe-RT1#show ip interface
+Ethernet0/0 is up, line protocol is up
+  Internet protocol processing disabled
+Ethernet0/1 is up, line protocol is up
+  Internet protocol processing disabled
+Cafe-RT1#show ip interface brief
+Ethernet0/0            192.168.1.1     YES manual up                    up
+Ethernet0/1            192.168.2.1     YES manual up                    up
+Cafe-RT1#ping 192.168.2.2
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 1/1/1 ms      <- link still /24 on this end
+
+! ---- Final state, after correcting the link mask to /30 ----
+Cafe-RT1#write memory
+Building configuration...
+[OK]
+Cafe-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.1.1     YES manual up                    up
+Ethernet0/1            192.168.2.1     YES manual up                    up
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+Cafe-RT1#show interfaces description
+Interface                      Status         Protocol Description
+Et0/0                          up             up       ## CoffeeHouse-LAN
+Et0/1                          up             up       ## P2P-to-Fallout
+Et0/2                          admin down     down
+Et0/3                          admin down     down
+Cafe-RT1#show ip route connected
+Gateway of last resort is not set
+
+      192.168.1.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.1.0/24 is directly connected, Ethernet0/0
+L        192.168.1.1/32 is directly connected, Ethernet0/0
+      192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.2.0/30 is directly connected, Ethernet0/1
+L        192.168.2.1/32 is directly connected, Ethernet0/1
+Cafe-RT1#ping 192.168.2.2
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+! ================= Fallout-RT1 =================
+
+Fallout-RT1(config-if)#ip address 192.0168.3.1 255.255.255.0             <- typo, accepted as 192.168.3.1
+Fallout-RT1#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.3.1     YES manual up                    up
+Ethernet0/1            192.168.2.2     YES manual up                    up
+Ethernet0/2            unassigned      YES TFTP   administratively down down
+Ethernet0/3            unassigned      YES TFTP   administratively down down
+Fallout-RT1#show ip route connected
+Gateway of last resort is not set
+
+      192.168.2.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.2.0/30 is directly connected, Ethernet0/1
+L        192.168.2.2/32 is directly connected, Ethernet0/1
+      192.168.3.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.3.0/24 is directly connected, Ethernet0/0
+L        192.168.3.1/32 is directly connected, Ethernet0/0
+Fallout-RT1#ping 192.168.2.1
+.....
+Success rate is 0 percent (0/5)                                            <- Cafe-RT1 addresses still swapped
+Fallout-RT1#ping 192.168.2.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+Fallout-RT1#wr
+Building configuration...
+[OK]
+Fallout-RT1#show interface description
+Interface                      Status         Protocol Description
+Et0/0                          up             up       ## Fallout-LAN##
+Et0/1                          up             up       ##P2P-to-CoffeeHouse##
+Et0/2                          admin down     down     ## Spare module - keep shutdown
+Et0/3                          admin down     down

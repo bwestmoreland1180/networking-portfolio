@@ -1,0 +1,28 @@
+! Working configuration from the lab (Cisco CML, IOS-XE router image).
+! Commands only, typos and retries removed. See verification.txt for the captured output.
+
+! ===================== Cafe-RT1 =====================
+configure terminal
+ interface ethernet 0/0
+  description ## CoffeeHouse-LAN
+  ip address 192.168.1.1 255.255.255.0
+  no shutdown
+ interface ethernet 0/1
+  description ## P2P-to-Fallout
+  ip address 192.168.2.1 255.255.255.252
+  no shutdown
+end
+write memory
+
+! ===================== Fallout-RT1 =====================
+configure terminal
+ interface ethernet 0/0
+  description ## Fallout-LAN##
+  ip address 192.168.3.1 255.255.255.0
+  no shutdown
+ interface ethernet 0/1
+  description ##P2P-to-CoffeeHouse##
+  ip address 192.168.2.2 255.255.255.252
+  no shutdown
+end
+write memory
