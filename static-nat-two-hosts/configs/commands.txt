@@ -1,0 +1,13 @@
+! Static NAT configuration added in the lab (Cisco CML, IOS-XE router image).
+! Interface addressing, the default route and ISP-Rtr were preloaded. Commands only.
+
+! ===================== Cafe-Rtr =====================
+configure terminal
+ ip nat inside source static 192.168.1.50 216.0.5.20
+ ip nat inside source static 192.168.1.51 216.0.5.21
+ interface ethernet 0/0
+  ip nat inside
+ interface ethernet 0/1
+  ip nat outside
+end
+write memory

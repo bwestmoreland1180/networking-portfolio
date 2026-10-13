@@ -1,0 +1,91 @@
+! Captured output from the lab (Cisco CML: Cafe-Rtr, ISP-Rtr, PC1, PC2).
+! Login, the route code legend, typos and console log messages trimmed.
+
+! ================= Cafe-Rtr =================
+
+! ---- Task 0: interfaces ----
+Cafe-Rtr#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.1.1     YES TFTP   up                    up
+Ethernet0/1            216.0.5.2       YES TFTP   up                    up
+Ethernet0/2            unassigned      YES unset  administratively down down
+Ethernet0/3            unassigned      YES unset  administratively down down
+
+! ---- Tasks 1 and 2: first mapping, inside/outside ----
+Cafe-Rtr(config)#ip nat inside source static 192.168.1.50 216.0.5.20
+Cafe-Rtr(config)#int ethernet 0/0
+Cafe-Rtr(config-if)#ip nat inside
+Cafe-Rtr(config)#int ethernet 0/1
+Cafe-Rtr(config-if)#ip nat outside
+Cafe-Rtr(config)#do show ip nat translation
+Pro Inside global      Inside local       Outside local      Outside global
+--- 216.0.5.20         192.168.1.50       ---                ---
+
+! ---- Task 4: second mapping ----
+Cafe-Rtr(config)#ip nat inside source static 192.168.1.51 216.0.5.21
+Cafe-Rtr#show ip nat translation
+Pro Inside global      Inside local       Outside local      Outside global
+--- 216.0.5.20         192.168.1.50       ---                ---
+--- 216.0.5.21         192.168.1.51       ---                ---
+Cafe-Rtr#wr
+Building configuration...
+[OK]
+
+! ================= PC1 (192.168.1.50) =================
+
+cisco@pc1:~$ ping -c 5 1.1.1.1                  <- before NAT
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 0 packets received, 100% packet loss
+cisco@pc1:~$ ping -c 5 1.1.1.1                  <- after NAT
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: seq=0 ttl=254 time=1.038 ms
+64 bytes from 1.1.1.1: seq=1 ttl=254 time=1.153 ms
+64 bytes from 1.1.1.1: seq=2 ttl=254 time=1.041 ms
+64 bytes from 1.1.1.1: seq=3 ttl=254 time=1.096 ms
+64 bytes from 1.1.1.1: seq=4 ttl=254 time=1.062 ms
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 1.038/1.078/1.153 ms
+
+! ================= PC2 (192.168.1.51) =================
+
+cisco@pc2:~$ ping -c 5 1.1.1.1
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: seq=0 ttl=254 time=1.687 ms
+64 bytes from 1.1.1.1: seq=1 ttl=254 time=1.016 ms
+64 bytes from 1.1.1.1: seq=2 ttl=254 time=1.025 ms
+64 bytes from 1.1.1.1: seq=3 ttl=254 time=1.034 ms
+64 bytes from 1.1.1.1: seq=4 ttl=254 time=1.390 ms
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 1.016/1.230/1.687 ms
+
+! ================= ISP-Rtr =================
+
+! ---- Inbound to the inside hosts ----
+ISP-Rtr>ping 216.0.5.20
+Sending 5, 100-byte ICMP Echos to 216.0.5.20, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+ISP-Rtr>ping 216.0.5.21
+Sending 5, 100-byte ICMP Echos to 216.0.5.21, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+
+! ---- No route to the private LAN ----
+ISP-Rtr>show ip route
+Gateway of last resort is not set
+
+      1.0.0.0/32 is subnetted, 1 subnets
+C        1.1.1.1 is directly connected, Loopback0
+      8.0.0.0/32 is subnetted, 1 subnets
+C        8.8.8.8 is directly connected, Loopback1
+      216.0.5.0/24 is variably subnetted, 4 subnets, 2 masks
+C        216.0.5.0/30 is directly connected, Ethernet0/0
+L        216.0.5.1/32 is directly connected, Ethernet0/0
+S        216.0.5.20/32 [1/0] via 216.0.5.2
+S        216.0.5.21/32 [1/0] via 216.0.5.2
