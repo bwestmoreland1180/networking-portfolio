@@ -1,0 +1,97 @@
+! Captured output from the lab (Cisco CML: Cafe-Rtr, PC1, PC2).
+! Login, typos, console log messages and blank lines in the running config trimmed.
+
+! ================= Cafe-Rtr =================
+
+! ---- Task 0: remove the static mappings ----
+Cafe-Rtr#show ip nat translation
+Pro Inside global      Inside local       Outside local      Outside global
+--- 216.0.5.20         192.168.1.50       ---                ---
+--- 216.0.5.21         192.168.1.51       ---                ---
+Cafe-Rtr(config)#no ip nat inside source static 192.168.1.50 216.0.5.20
+Cafe-Rtr(config)#no ip nat inside source static 192.168.1.51 216.0.5.21
+Cafe-Rtr#show ip nat translation
+Cafe-Rtr#                                         <- empty
+
+! ---- Task 1: inside address list ----
+Cafe-Rtr(config)#access-list 1 permit 192.168.1.0 0.0.0.255
+Cafe-Rtr#show ip access-lists
+Standard IP access list 1
+    10 permit 192.168.1.0, wildcard bits 0.0.0.255
+
+! ---- Task 2: public pool ----
+Cafe-Rtr(config)#ip nat pool Cafe-Public 216.0.5.50 216.0.5.100 netmask 255.255.255.0
+Cafe-Rtr#show running-config | include ip nat pool
+ip nat pool Cafe-Public 216.0.5.50 216.0.5.100 netmask 255.255.255.0
+
+! ---- Task 3: tie them together ----
+Cafe-Rtr(config)#ip nat inside source list 1 pool Cafe-Public
+Cafe-Rtr#show run
+version 17.16
+hostname Cafe-Rtr
+interface Ethernet0/0
+ description Cafe LAN
+ ip address 192.168.1.1 255.255.255.0
+ ip nat inside
+interface Ethernet0/1
+ description WAN toward ISP-Rtr
+ ip address 216.0.5.2 255.255.255.252
+ ip nat outside
+ip nat pool Cafe-Public 216.0.5.50 216.0.5.100 netmask 255.255.255.0
+ip nat inside source list 1 pool Cafe-Public
+ip route 0.0.0.0 0.0.0.0 216.0.5.1
+ip access-list standard 1
+ 10 permit 192.168.1.0 0.0.0.255
+
+! ================= PC1 (192.168.1.50) =================
+
+cisco@pc1:~$ ping -c 5 1.1.1.1
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: seq=0 ttl=254 time=1.535 ms
+64 bytes from 1.1.1.1: seq=1 ttl=254 time=0.927 ms
+64 bytes from 1.1.1.1: seq=2 ttl=254 time=0.974 ms
+64 bytes from 1.1.1.1: seq=3 ttl=254 time=0.911 ms
+64 bytes from 1.1.1.1: seq=4 ttl=254 time=0.938 ms
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.911/1.057/1.535 ms
+
+! ================= PC2 (192.168.1.51) =================
+
+cisco@pc2:~$ ping -c 5 1.1.1.1
+PING 1.1.1.1 (1.1.1.1): 56 data bytes
+64 bytes from 1.1.1.1: seq=0 ttl=254 time=1.624 ms
+64 bytes from 1.1.1.1: seq=1 ttl=254 time=0.888 ms
+64 bytes from 1.1.1.1: seq=2 ttl=254 time=0.984 ms
+64 bytes from 1.1.1.1: seq=3 ttl=254 time=0.930 ms
+64 bytes from 1.1.1.1: seq=4 ttl=254 time=0.935 ms
+
+--- 1.1.1.1 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.888/1.072/1.624 ms
+
+! ================= Cafe-Rtr: Task 4, translations after the pings =================
+
+Cafe-Rtr#show ip nat translation
+Pro Inside global      Inside local       Outside local      Outside global
+icmp 216.0.5.50:711    192.168.1.50:711   1.1.1.1:711        1.1.1.1:711
+--- 216.0.5.50         192.168.1.50       ---                ---
+icmp 216.0.5.51:710    192.168.1.51:710   1.1.1.1:710        1.1.1.1:710
+--- 216.0.5.51         192.168.1.51       ---                ---
+Cafe-Rtr#show ip nat statistics
+Total active translations: 2 (0 static, 2 dynamic; 0 extended)
+Outside interfaces:
+  Ethernet0/1
+Inside interfaces:
+  Ethernet0/0
+Hits: 20  Misses: 0
+CEF Translated packets: 20, CEF Punted packets: 0
+ Dynamic overload mapping configured: 0
+Expired translations: 2
+Dynamic mappings:
+-- Inside Source
+[Id: 1] access-list 1 pool Cafe-Public refcount 2
+ pool Cafe-Public: id 1, netmask 255.255.255.0
+        start 216.0.5.50 end 216.0.5.100
+        type generic, total addresses 51, allocated 2 (3%), misses 0

@@ -1,0 +1,11 @@
+! Dynamic NAT configuration from the lab (Cisco CML, IOS-XE 17.16 router image).
+! Interface addressing, ip nat inside/outside and the default route were already in place. Commands only.
+
+! ===================== Cafe-Rtr =====================
+configure terminal
+ no ip nat inside source static 192.168.1.50 216.0.5.20
+ no ip nat inside source static 192.168.1.51 216.0.5.21
+ access-list 1 permit 192.168.1.0 0.0.0.255
+ ip nat pool Cafe-Public 216.0.5.50 216.0.5.100 netmask 255.255.255.0
+ ip nat inside source list 1 pool Cafe-Public
+end
