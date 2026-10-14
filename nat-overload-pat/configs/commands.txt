@@ -1,0 +1,18 @@
+! NAT overload configuration from the lab (Cisco CML, IOS-XE 17.16 router image).
+! Addressing, ip nat inside/outside, access list 1 and the default route were already in place. Commands only.
+
+! ===================== Cafe-Rtr =====================
+configure terminal
+ no ip nat inside source list 1 pool Cafe-Public
+ interface ethernet 0/0
+  shutdown
+ interface ethernet 0/1
+  shutdown
+ exit
+ ip nat inside source list 1 interface ethernet 0/1 overload
+ interface ethernet 0/0
+  no shutdown
+ interface ethernet 0/1
+  no shutdown
+end
+write memory

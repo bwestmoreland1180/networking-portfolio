@@ -1,0 +1,106 @@
+! Captured output from the lab (Cisco CML: Cafe-Rtr, PC1, PC2).
+! Login, typos, console log messages and blank lines in the running config trimmed.
+
+! ================= Cafe-Rtr =================
+
+! ---- Task 0: starting NAT config ----
+Cafe-Rtr#show run
+interface Ethernet0/0
+ description Cafe LAN
+ ip address 192.168.1.1 255.255.255.0
+ ip nat inside
+interface Ethernet0/1
+ description WAN toward ISP-Rtr
+ ip address 216.0.5.2 255.255.255.252
+ ip nat outside
+ip nat pool Cafe-Public 216.0.5.20 216.0.5.30 netmask 255.255.255.240
+ip nat inside source list 1 pool Cafe-Public
+ip route 0.0.0.0 0.0.0.0 216.0.5.1
+ip access-list standard 1
+ 10 permit 192.168.1.0 0.0.0.255
+
+Cafe-Rtr(config)#no ip nat inside source list 1 pool Cafe-Public
+Cafe-Rtr#show run
+ip nat pool Cafe-Public 216.0.5.20 216.0.5.30 netmask 255.255.255.240
+ip route 0.0.0.0 0.0.0.0 216.0.5.1         <- the pool rule is gone
+
+! ---- Tasks 1 and 2: interfaces down, overload rule added ----
+*Oct 14 18:41:49.248: %LINK-5-CHANGED: Interface Ethernet0/0, changed state to administratively down
+*Oct 14 18:42:10.791: %LINK-5-CHANGED: Interface Ethernet0/1, changed state to administratively down
+Cafe-Rtr(config)#ip nat inside source list 1 interface ethernet 0/1 over
+Cafe-Rtr#show ip interface brief
+Interface              IP-Address      OK? Method Status                Protocol
+Ethernet0/0            192.168.1.1     YES TFTP   administratively down down
+Ethernet0/1            216.0.5.2       YES TFTP   administratively down down
+Ethernet0/2            unassigned      YES unset  administratively down down
+Ethernet0/3            unassigned      YES unset  administratively down down
+Cafe-Rtr#show running-config interface ethernet 0/0
+interface Ethernet0/0
+ description Cafe LAN
+ ip address 192.168.1.1 255.255.255.0
+ ip nat inside
+ shutdown
+Cafe-Rtr#show running-config interface ethernet 0/1
+interface Ethernet0/1
+ description WAN toward ISP-Rtr
+ ip address 216.0.5.2 255.255.255.252
+ ip nat outside
+ shutdown
+
+! ---- Task 3: interfaces back up ----
+*Oct 14 18:49:57.397: %LINK-3-UPDOWN: Interface Ethernet0/0, changed state to up
+*Oct 14 18:49:58.397: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/0, changed state to up
+*Oct 14 18:50:14.034: %LINK-3-UPDOWN: Interface Ethernet0/1, changed state to up
+*Oct 14 18:50:15.034: %LINEPROTO-5-UPDOWN: Line protocol on Interface Ethernet0/1, changed state to up
+
+! ---- Before any traffic ----
+Cafe-Rtr#show ip nat translations
+Cafe-Rtr#                                  <- empty
+Cafe-Rtr#show ip nat statistics
+Total active translations: 0 (0 static, 0 dynamic; 0 extended)
+Outside interfaces:
+  Ethernet0/1
+Inside interfaces:
+  Ethernet0/0
+Hits: 20  Misses: 0
+ Dynamic overload mapping configured: 1
+Dynamic mappings:
+-- Inside Source
+[Id: 2] access-list 1 interface Ethernet0/1 refcount 0
+
+! ================= PC1 (192.168.1.50) and PC2 (192.168.1.51) =================
+
+cisco@pc1:~$ ping -c 5 1.1.1.1
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.815/1.072/1.791 ms
+cisco@pc1:~$ ping -c 5 1.1.1.1
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.652/0.822/0.906 ms
+
+cisco@pc2:~$ ping -c 5 1.1.1.1
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.842/1.036/1.597 ms
+cisco@pc2:~$ ping -c 5 1.1.1.1
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 0.810/0.864/0.941 ms
+
+! ================= Cafe-Rtr: after traffic =================
+
+Cafe-Rtr#show ip nat statistics
+Total active translations: 2 (0 static, 2 dynamic; 2 extended)
+Hits: 40  Misses: 0
+ Dynamic overload mapping configured: 1
+Dynamic mappings:
+-- Inside Source
+[Id: 2] access-list 1 interface Ethernet0/1 refcount 2
+
+! ---- Task 4: translations captured during a 30-ping run on both PCs ----
+Cafe-Rtr#show ip nat translation
+Pro Inside global      Inside local       Outside local      Outside global
+icmp 216.0.5.2:1024    192.168.1.50:716   1.1.1.1:716        1.1.1.1:1024
+icmp 216.0.5.2:1025    192.168.1.51:713   1.1.1.1:713        1.1.1.1:1025
+Cafe-Rtr#wr
+Building configuration...
+[OK]
+Cafe-Rtr#show running-config | include ip nat inside source
+ip nat inside source list 1 interface Ethernet0/1 overload
